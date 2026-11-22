@@ -1,35 +1,21 @@
 import streamlit as st
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+import joblib
 
 st.set_page_config(page_title="درع الحماية الذكي", page_icon="🛡️")
 st.title("🛡️ درع الحماية الذكي (Antihacker AI)")
+st.caption("مدعوم بنموذج ذكاء اصطناعي مُدرّب على 50,000 رابط من قاعدة بيانات Kaggle")
 
-# --- 1. تدريب نموذج الذكاء الاصطناعي ---
+# --- 1. تحميل عقل الذكاء الاصطناعي المُدرّب ---
 @st.cache_resource
-def train_model():
-    def extract_url_features(url):
-        url = str(url)
-        return [len(url), url.count('.'), url.count('-'), 1 if '@' in url else 0, 1 if url.startswith('https') else 0]
+def load_ai_brain():
+    return joblib.load("ai_brain.pkl")
 
-    sample_urls = [
-        "https://google.com", "https://youtube.com",
-        "https://github.com", "https://amazon.ae",
-        "https://apple.com", "https://microsoft.com",
-        "http://update-bank-account-security-login.com@evil.com",
-        "http://free-iphone-winner-claim-now-2026.xyz",
-        "http://192.168.1",
-        "http://secure-login-apple-id-verification-alert.com",
-        "http://whatsapp-gold-download-free-apk@virus.net",
-        "http://bit.ly"
-    ]
-    labels = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
-    X_train = np.array([extract_url_features(u) for u in sample_urls])
-    model = RandomForestClassifier(n_estimators=50, random_state=42)
-    model.fit(X_train, labels)
-    return model, extract_url_features
+ai_model = load_ai_brain()
 
-ai_model, extract_url_features = train_model()
+def extract_url_features(url):
+    url = str(url)
+    return [len(url), url.count('.'), url.count('-'), 1 if '@' in url else 0, 1 if url.startswith('https') else 0]
 
 # --- 2. تقسيم الواجهة إلى 3 تبويبات ---
 tab1, tab2, tab3 = st.tabs(["🧠 فحص الروابط (AI)", "🖼️ الصور والفيديو", "📄 فحص ملفات PDF"])
